@@ -1,0 +1,1162 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>GC Portal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap">
+
+<style>
+/* ── Design tokens ─────────────────────────────────────── */
+:root {
+  --sidebar-w: 220px;
+
+  /* Light — content area */
+  --bg:        #f5f7fb;
+  --surface:   #ffffff;
+  --fg:        #1a202c;
+  --fg2:       #4a5568;
+  --fg3:       #9198a1;
+  --border:    #dde3ed;
+  --bdr-s:     #edf0f7;
+  --row-hov:   #f5f7fb;
+  --th-bg:     #f5f7fb;
+
+  /* Sidebar — light */
+  --sb-bg:     #ffffff;
+  --sb-fg:     #6b7280;
+  --sb-act:    #1a202c;
+  --sb-bdr:    #e5e7eb;
+  --sb-hov:    #f3f6ff;
+  --sb-abg:    #eff3ff;
+
+  /* Hero */
+  --hero-bg:   #edf1fb;
+  --hero-bdr:  #d5ddf0;
+  --hero-h1:   #1e3a5f;
+  --hero-desc: #4a5568;
+  --hero-eye:  #2563eb;
+
+  /* Pills */
+  --pill-bg:  rgba(30,58,95,0.07);
+  --pill-bdr: rgba(30,58,95,0.18);
+  --pill-n:   #1e3a5f;
+  --pill-l:   #6b7280;
+
+  /* Action cards (light) */
+  --acard-bg:  #ffffff;
+  --acard-bdr: #dde3ed;
+
+  /* Accent (gold — kept for badges, tag pills) */
+  --acc:       #e8a82a;
+  --acc-dim:   rgba(232,168,42,0.10);
+  --acc-bdr:   rgba(232,168,42,0.30);
+
+  /* Primary (navy) */
+  --pri:       #1e3a5f;
+  --pri-hov:   #152d4a;
+  --pri-fg:    #ffffff;
+
+  /* Ghost button */
+  --ghost-c:   #1e3a5f;
+  --ghost-bdr: rgba(30,58,95,0.35);
+
+  /* Links */
+  --link:      #2563eb;
+
+  /* Semantic badges */
+  --ok-fg: #1a7f37; --ok-bg: #dafbe1; --ok-bd: #aceebb;
+  --bl-fg: #0550ae; --bl-bg: #ddf4ff; --bl-bd: #a8d8f0;
+  --pu-fg: #8250df; --pu-bg: #fbefff; --pu-bd: #d8b4fe;
+  --go-fg: #9a6700; --go-bg: #fff8c5; --go-bd: #f7c948;
+  --mu-fg: #656d76; --mu-bg: #f6f8fa; --mu-bd: #d0d7de;
+
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --t: 0.13s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#0d1117; --surface:#161b22; --fg:#e6edf3; --fg2:#8d96a0; --fg3:#6e7681;
+    --border:#30363d; --bdr-s:#21262d; --row-hov:#1c2128; --th-bg:#161b22;
+    --sb-bg:#0f1117; --sb-fg:#7d8590; --sb-act:#e6edf3; --sb-bdr:#21262d;
+    --sb-hov:rgba(255,255,255,0.04); --sb-abg:rgba(255,255,255,0.07);
+    --hero-bg:#0d1117; --hero-bdr:#21262d; --hero-h1:#e6edf3; --hero-desc:#848d97; --hero-eye:#4d8eff;
+    --pill-bg:rgba(255,255,255,0.05); --pill-bdr:rgba(255,255,255,0.10);
+    --pill-n:#e8a82a; --pill-l:#8d96a0;
+    --acard-bg:rgba(255,255,255,0.04); --acard-bdr:rgba(255,255,255,0.09);
+    --pri:#2563eb; --pri-hov:#1d4ed8; --pri-fg:#ffffff;
+    --ghost-c:#e6edf3; --ghost-bdr:rgba(255,255,255,0.18); --link:#4d8eff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#0d1117; --surface:#161b22; --fg:#e6edf3; --fg2:#8d96a0; --fg3:#6e7681;
+  --border:#30363d; --bdr-s:#21262d; --row-hov:#1c2128; --th-bg:#161b22;
+  --sb-bg:#0f1117; --sb-fg:#7d8590; --sb-act:#e6edf3; --sb-bdr:#21262d;
+  --sb-hov:rgba(255,255,255,0.04); --sb-abg:rgba(255,255,255,0.07);
+  --hero-bg:#0d1117; --hero-bdr:#21262d; --hero-h1:#e6edf3; --hero-desc:#848d97; --hero-eye:#4d8eff;
+  --pill-bg:rgba(255,255,255,0.05); --pill-bdr:rgba(255,255,255,0.10);
+  --pill-n:#e8a82a; --pill-l:#8d96a0;
+  --acard-bg:rgba(255,255,255,0.04); --acard-bdr:rgba(255,255,255,0.09);
+  --pri:#2563eb; --pri-hov:#1d4ed8; --pri-fg:#ffffff;
+  --ghost-c:#e6edf3; --ghost-bdr:rgba(255,255,255,0.18); --link:#4d8eff;
+  color-scheme: dark;
+}
+
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: var(--font); background: var(--bg); color: var(--fg);
+  line-height: 1.5; min-height: 100%;
+  padding-left: max(0px, env(safe-area-inset-left,0px));
+  padding-right: max(0px, env(safe-area-inset-right,0px));
+  padding-block: 0;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font); cursor: pointer; }
+
+/* ── Layout ─────────────────────────────────────────────── */
+.layout { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w); background: var(--sb-bg);
+  position: fixed; top: 0; left: 0; height: 100vh;
+  overflow-y: auto; display: flex; flex-direction: column;
+  z-index: 100; border-right: 1px solid var(--sb-bdr);
+  scrollbar-width: thin;
+}
+
+/* Brand strip: always dark navy regardless of theme */
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 16px 15px;
+  background: #1e3a5f;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  flex-shrink: 0;
+}
+.brand-logo {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(232,168,42,0.45);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #e8a82a; letter-spacing: 0.04em;
+}
+.brand-text { display: flex; flex-direction: column; }
+.brand-name { font-size: 13px; font-weight: 600; color: #ffffff; line-height: 1.3; }
+.brand-sub  { font-size: 10px; color: rgba(255,255,255,0.50); margin-top: 1px; }
+
+.nav-sec { padding: 12px 0 5px; }
+.nav-sec-lbl {
+  display: block; font-size: 9.5px; font-weight: 600; letter-spacing: 0.1em;
+  color: var(--fg3); padding: 0 16px 5px; text-transform: uppercase;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 5px 16px 5px 14px; font-size: 12.5px; color: var(--sb-fg); text-align: left;
+  cursor: pointer; border: none; border-left: 2px solid transparent;
+  background: none; transition: color var(--t), background var(--t), border-color var(--t);
+}
+.nav-item:hover  { color: var(--sb-act); background: var(--sb-hov); }
+.nav-item.active {
+  color: #1e3a5f; background: var(--sb-abg);
+  border-left-color: #1e3a5f; font-weight: 500;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .nav-item.active {
+    color: #4d8eff; border-left-color: #4d8eff;
+  }
+}
+:root[data-theme="dark"] .nav-item.active {
+  color: #4d8eff; border-left-color: #4d8eff;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dr{background:#e05c5c} .db{background:#4d8eff} .do{background:#e8972a}
+.dg{background:#6b7280} .dG{background:#22c55e} .dp{background:#a78bfa}
+
+.sb-footer {
+  margin-top: auto; padding: 12px 16px;
+  border-top: 1px solid var(--sb-bdr);
+  font-size: 10.5px; color: var(--fg3); line-height: 1.7;
+}
+.sb-footer a { color: var(--link); }
+
+/* ── Main ─────────────────────────────────────────────── */
+.main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; }
+
+/* ── Hero ─────────────────────────────────────────────── */
+.hero {
+  background: var(--hero-bg);
+  border-bottom: 1px solid var(--hero-bdr);
+  padding: 40px 40px 32px;
+}
+.welcome-line {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--hero-eye); margin-bottom: 10px;
+}
+.hero h1 {
+  font-size: 26px; font-weight: 600; line-height: 1.25; max-width: 560px;
+  color: var(--hero-h1); margin-bottom: 11px; text-wrap: balance;
+}
+.hero h1 .sub {
+  display: block; font-size: 14px; font-weight: 400;
+  color: var(--hero-desc); margin-top: 4px; letter-spacing: 0;
+}
+.hero-desc {
+  font-size: 13px; color: var(--hero-desc); max-width: 480px;
+  line-height: 1.72; margin-bottom: 22px;
+}
+.pills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+.pill {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  background: var(--pill-bg); border: 1px solid var(--pill-bdr);
+  border-radius: 20px; padding: 5px 13px;
+}
+.pill .n { font-size: 15px; font-weight: 700; color: var(--pill-n); font-variant-numeric: tabular-nums; }
+.pill .l { font-size: 12px; color: var(--pill-l); }
+.pill.tag { background: var(--acc-dim); border-color: var(--acc-bdr); align-items: center; }
+.pill.tag .k { font-size: 11px; font-weight: 700; color: var(--acc); }
+.pill.tag .v { font-size: 11px; color: #a07818; }
+
+.acts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Buttons ─────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 15px;
+  border-radius: 3px; font-size: 12.5px; font-weight: 500; cursor: pointer;
+  border: 1px solid transparent; transition: all var(--t);
+  font-family: var(--font); text-decoration: none; white-space: nowrap;
+}
+.btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* Primary = navy (light) / blue (dark) */
+.btn-pri  { background: var(--pri); color: var(--pri-fg); border-color: var(--pri); }
+.btn-pri:hover { background: var(--pri-hov); border-color: var(--pri-hov); }
+
+/* Ghost = navy outline */
+.btn-ghost { background: transparent; color: var(--ghost-c); border-color: var(--ghost-bdr); }
+.btn-ghost:hover { background: rgba(30,58,95,0.06); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .btn-ghost:hover { background: rgba(255,255,255,0.06); }
+}
+:root[data-theme="dark"] .btn-ghost:hover { background: rgba(255,255,255,0.06); }
+
+.btn-out { background: var(--surface); color: var(--fg2); border: 1px solid var(--border); }
+.btn-out:hover { background: var(--bg); color: var(--fg); }
+.btn-sm { padding: 5px 11px; font-size: 11.5px; }
+
+/* ── Action cards ─────────────────────────────────── */
+.action-cards {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin: 0 0 24px; max-width: 540px;
+}
+.acard {
+  background: var(--acard-bg); border: 1px solid var(--acard-bdr);
+  border-radius: 5px; padding: 18px 18px 14px;
+  display: flex; flex-direction: column; gap: 5px;
+  transition: box-shadow var(--t), border-color var(--t);
+}
+.acard:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-color: var(--border); }
+.acard-hi { border-color: rgba(30,58,95,0.25); background: rgba(30,58,95,0.03); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .acard-hi { background: var(--acard-bg); border-color: rgba(77,142,255,0.25); }
+}
+:root[data-theme="dark"] .acard-hi { background: var(--acard-bg); border-color: rgba(77,142,255,0.25); }
+.acard-icon { font-size: 18px; line-height: 1; margin-bottom: 2px; }
+.acard-title { font-size: 13px; font-weight: 600; color: var(--fg); }
+.acard-desc { font-size: 11.5px; color: var(--fg2); line-height: 1.6; flex: 1; }
+.acard-btn  { margin-top: 10px; align-self: flex-start; }
+@media (max-width: 520px) { .action-cards { grid-template-columns: 1fr; } }
+
+/* ── Home content ─────────────────────────────────────── */
+.hcontent { padding: 0 40px 56px; }
+.info-grid {
+  display: grid; grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+  gap: 1px; background: var(--bdr-s); border: 1px solid var(--border);
+  border-radius: 4px; overflow: hidden; margin-top: 22px;
+}
+.ic { background: var(--surface); padding: 14px 17px; }
+.ic-l {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--fg3); margin-bottom: 5px;
+}
+.ic-v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ic-v.sm { font-size: 12.5px; font-weight: 400; color: var(--fg2); }
+.panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 4px; margin-top: 18px; overflow: hidden;
+}
+.panel-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 17px; border-bottom: 1px solid var(--bdr-s);
+}
+.panel-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 9px; }
+.picon {
+  width: 23px; height: 23px; background: var(--bg); border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+}
+.picon svg { width: 11px; height: 11px; color: var(--fg2); }
+.upd { font-size: 11px; color: var(--ok-fg); background: var(--ok-bg); padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.s-table { width: 100%; border-collapse: collapse; }
+.s-table tr { border-bottom: 1px solid var(--bdr-s); }
+.s-table tr:last-child { border-bottom: none; }
+.s-table td { padding: 10px 17px; font-size: 13px; }
+.s-table td:first-child { color: var(--fg2); }
+.s-table td:last-child { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.s-table td.ind { padding-left: 30px; font-size: 12.5px; }
+.about { padding: 14px 17px; font-size: 13px; line-height: 1.8; color: var(--fg2); max-width: 760px; }
+.about p+p { margin-top: 9px; }
+.about strong { color: var(--fg); }
+
+/* Citation boxes */
+.cite {
+  margin-top: 18px; padding: 12px 15px;
+  background: #fffbf0; border: 1px solid #f0d070;
+  border-radius: 4px; font-size: 12px; color: #6a5800; line-height: 1.7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cite {
+    background: rgba(232,168,42,0.07); border-color: rgba(232,168,42,0.22);
+    color: #c8a84b;
+  }
+}
+:root[data-theme="dark"] .cite {
+  background: rgba(232,168,42,0.07); border-color: rgba(232,168,42,0.22);
+  color: #c8a84b;
+}
+.cite strong { font-weight: 600; }
+.cite code { font-family: var(--mono); font-size: 11px; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 2px; }
+.cite a { color: #a07818; }
+.cite-note { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.07); font-size: 11px; color: #a07818; line-height: 1.65; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cite-note { color: #9b8450; border-top-color: rgba(255,255,255,0.08); }
+  :root:not([data-theme="light"]) .cite code { background: rgba(255,255,255,0.07); }
+}
+:root[data-theme="dark"] .cite-note { color: #9b8450; border-top-color: rgba(255,255,255,0.08); }
+:root[data-theme="dark"] .cite code { background: rgba(255,255,255,0.07); }
+
+/* ── Sky map ──────────────────────────────────────────── */
+.skymap-wrap { padding: 4px 0 0; }
+#skymap { width: 100%; height: auto; display: block; }
+.skymap-legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 8px 17px 12px; }
+.sml-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--fg3); }
+.sml-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Catalogue view ───────────────────────────────────── */
+.pg-hd { padding: 20px 40px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.pg-hd-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.pg-hd h2 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+.pg-hd p  { font-size: 12.5px; color: var(--fg2); }
+.pg-acts  { display: flex; gap: 6px; flex-shrink: 0; margin-top: 2px; }
+
+.fbar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 8px 40px; display: flex; flex-wrap: wrap; gap: 7px; align-items: center;
+  position: sticky; top: 0; z-index: 50;
+}
+.fc {
+  height: 28px; border: 1px solid var(--border); border-radius: 3px;
+  padding: 0 9px; font-size: 12px; font-family: var(--font);
+  color: var(--fg); background: var(--surface); outline: none;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.fc:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+#q-search { min-width: 180px; }
+select.fc {
+  padding-right: 22px; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%239198a1'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 7px center;
+}
+.fsep { width: 1px; height: 19px; background: var(--border); }
+.flbl { font-size: 11.5px; color: var(--fg3); white-space: nowrap; }
+.rcnt { font-size: 11.5px; color: var(--fg3); margin-left: auto; }
+
+.tbl-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-top: 14px; overflow: hidden; }
+.twrap { overflow-x: auto; }
+.dtbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.dtbl thead th {
+  background: var(--th-bg); border-bottom: 2px solid var(--border);
+  padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 600;
+  color: var(--fg2); white-space: nowrap; cursor: pointer; user-select: none;
+  position: sticky; top: 44px; transition: background var(--t);
+}
+.dtbl thead th:hover { background: var(--bdr-s); color: var(--fg); }
+.dtbl thead th.sa::after { content: ' ↑'; color: #2563eb; }
+.dtbl thead th.sd::after { content: ' ↓'; color: #2563eb; }
+.dtbl tbody tr { border-bottom: 1px solid var(--bdr-s); }
+.dtbl tbody tr:hover { background: var(--row-hov); }
+.dtbl tbody tr:last-child { border-bottom: none; }
+.dtbl td { padding: 7px 10px; vertical-align: middle; }
+.dtbl td.mono { font-family: var(--mono); font-size: 11px; color: var(--fg2); }
+.dtbl td.num  { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); font-size: 11px; }
+.dtbl td.idc  { font-family: var(--mono); font-size: 10.5px; color: var(--fg3); }
+.dtbl td a    { color: var(--link); }
+.dtbl td a:hover { text-decoration: underline; }
+.nv { color: var(--fg3); }
+
+.badge { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 10px; font-size: 10.5px; font-weight: 500; white-space: nowrap; }
+.bok  { background: var(--ok-bg); color: var(--ok-fg); border: 1px solid var(--ok-bd); }
+.bmu  { background: var(--mu-bg); color: var(--mu-fg); border: 1px solid var(--mu-bd); }
+.bbl  { background: var(--bl-bg); color: var(--bl-fg); border: 1px solid var(--bl-bd); }
+.bpu  { background: var(--pu-bg); color: var(--pu-fg); border: 1px solid var(--pu-bd); }
+.bgo  { background: var(--go-bg); color: var(--go-fg); border: 1px solid var(--go-bd); }
+
+.pager { display: flex; align-items: center; justify-content: space-between; padding: 10px 13px; border-top: 1px solid var(--bdr-s); }
+.pgi { font-size: 11.5px; color: var(--fg2); }
+.pgb { display: flex; gap: 3px; }
+.pgbtn {
+  height: 24px; min-width: 24px; padding: 0 7px;
+  border: 1px solid var(--border); border-radius: 3px;
+  background: var(--surface); font-size: 11.5px; color: var(--fg2);
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font); transition: all var(--t);
+}
+.pgbtn:hover:not(:disabled) { background: var(--bg); color: var(--fg); }
+.pgbtn.cur { background: var(--pri); border-color: var(--pri); color: #fff; }
+.pgbtn:disabled { opacity: 0.35; cursor: default; }
+
+.col-notes { margin-top: 8px; font-size: 11px; color: var(--fg3); line-height: 1.8; }
+.no-res { padding: 40px; text-align: center; color: var(--fg3); font-size: 13px; }
+
+/* ── Upload modal ─────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.40);
+  z-index: 200; display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-backdrop[hidden] { display: none; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 24px; width: 100%; max-width: 520px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18); max-height: 90vh; overflow-y: auto;
+}
+.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--fg); }
+.form-row { margin-bottom: 14px; }
+.form-label {
+  display: block; font-size: 11.5px; font-weight: 600; color: var(--fg2);
+  margin-bottom: 5px; letter-spacing: 0.03em; text-transform: uppercase;
+}
+.form-input {
+  width: 100%; height: 32px; border: 1px solid var(--border); border-radius: 3px;
+  padding: 0 10px; font-size: 13px; font-family: var(--font);
+  background: var(--surface); color: var(--fg); outline: none;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+textarea.form-input { height: auto; padding: 8px 10px; resize: vertical; }
+.form-hint { font-size: 11px; color: var(--fg3); margin-top: 4px; }
+.modal-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+  margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--bdr-s);
+}
+.modal-note {
+  font-size: 11.5px; color: var(--fg3); line-height: 1.65;
+  background: var(--bg); border: 1px solid var(--bdr-s);
+  border-radius: 3px; padding: 10px 12px; margin-bottom: 14px;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 800px) {
+  :root { --sidebar-w: 0px; }
+  .sidebar { display: none; }
+  .hero, .hcontent, .pg-hd, .fbar { padding-left: max(16px, env(safe-area-inset-left,0px)); padding-right: max(16px, env(safe-area-inset-right,0px)); }
+  .tbl-panel { margin-left: max(16px, env(safe-area-inset-left,0px)); margin-right: max(16px, env(safe-area-inset-right,0px)); }
+}
+</style>
+
+<!-- ═══════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════ -->
+<div class="layout">
+<nav class="sidebar">
+  <div class="brand">
+    <div class="brand-logo">GC</div>
+    <div class="brand-text">
+      <span class="brand-name">GC Portal</span>
+      <span class="brand-sub">Extragalactic Globular Clusters</span>
+    </div>
+  </div>
+
+  <div class="nav-sec">
+    <span class="nav-sec-lbl">Catalogue</span>
+    <button class="nav-item active" data-view="home" onclick="nav(this,'home')">
+      <span class="dot dr"></span> All globular clusters
+    </button>
+    <button class="nav-item" onclick="nav(this,'cat');setFilter('','','')">
+      <span class="dot db"></span> Host galaxies
+    </button>
+    <button class="nav-item" onclick="nav(this,'cat');setFilter('confirmed','','')">
+      <span class="dot do"></span> Confirmed clusters
+    </button>
+    <button class="nav-item" onclick="nav(this,'cat');setFilter('candidate','','')">
+      <span class="dot dg"></span> Candidate clusters
+    </button>
+  </div>
+
+  <div class="nav-sec">
+    <span class="nav-sec-lbl">Spectra</span>
+    <button class="nav-item" onclick="nav(this,'cat');setFilter('','spectroscopic','')">
+      <span class="dot db"></span> MUSE extractions
+    </button>
+    <button class="nav-item" onclick="nav(this,'cat');setFilter('','spectroscopic','')">
+      <span class="dot dG"></span> Archival (VLT/Gemini)
+    </button>
+    <button class="nav-item">
+      <span class="dot dp"></span> Literature spectra
+    </button>
+  </div>
+
+  <div class="nav-sec">
+    <span class="nav-sec-lbl">Plots</span>
+    <button class="nav-item">Color distributions</button>
+    <button class="nav-item">Luminosity functions</button>
+    <button class="nav-item">Spatial maps</button>
+  </div>
+
+  <div class="nav-sec">
+    <span class="nav-sec-lbl">Other</span>
+    <button class="nav-item">API access</button>
+    <button class="nav-item">Documentation</button>
+  </div>
+
+  <div class="sb-footer">
+    v0.01 &middot; <a href="#">EAT Group / UFRGS</a> &middot; <a href="#">LIneA</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     MAIN
+════════════════════════════════════════ -->
+<main class="main">
+
+<!-- ─── HOME VIEW ─────────────────────── -->
+<div id="view-home">
+  <div class="hero">
+    <div class="welcome-line">EAT Group · UFRGS &nbsp;×&nbsp; LIneA Brazil</div>
+    <h1>Welcome to the GC Portal
+      <span class="sub">Open Extragalactic Globular Cluster Portal</span>
+    </h1>
+    <p class="hero-desc">A spectroscopically confirmed catalogue of extragalactic globular clusters — built as a training set for LSST photometric classification. Jointly maintained by the EAT Group (UFRGS) and LIneA.</p>
+
+    <div class="action-cards">
+      <div class="acard">
+        <div class="acard-icon">↑</div>
+        <div class="acard-title">Upload GC Data</div>
+        <div class="acard-desc">Contribute spectroscopic measurements, space-based imaging data, or new GC catalogue entries to the portal.</div>
+        <button class="btn btn-ghost btn-sm acard-btn" id="btn-upload">Contribute data →</button>
+      </div>
+      <div class="acard acard-hi">
+        <div class="acard-icon">⊙</div>
+        <div class="acard-title">Query GC Data</div>
+        <div class="acard-desc">Browse, filter and download the full catalogue by host galaxy, classification type or sky position.</div>
+        <button class="btn btn-pri btn-sm acard-btn" onclick="nav(null,'cat')">Browse catalogue →</button>
+      </div>
+    </div>
+
+    <div class="pills">
+      <div class="pill"><span class="n">18,426</span><span class="l">confirmed GCs</span></div>
+      <div class="pill"><span class="n">612</span><span class="l">host galaxies</span></div>
+      <div class="pill"><span class="n">5,907</span><span class="l">spectra</span></div>
+      <div class="pill tag"><span class="k">LSST-ready</span>&nbsp;<span class="v">training set</span></div>
+    </div>
+    <div class="acts" style="margin-top:4px">
+      <button class="btn btn-ghost btn-sm" id="btn-dl-hero">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 13h12"/></svg>
+        Download full catalogue
+      </button>
+    </div>
+  </div>
+
+  <div class="hcontent">
+    <div class="info-grid">
+      <div class="ic"><div class="ic-l">Confirmed GCs</div><div class="ic-v">18,426</div></div>
+      <div class="ic"><div class="ic-l">Host galaxies</div><div class="ic-v">612</div></div>
+      <div class="ic"><div class="ic-l">Spectra</div><div class="ic-v">5,907</div></div>
+      <div class="ic"><div class="ic-l">Photometric filters</div><div class="ic-v sm">u, g, r, i, z, y (LSST)<br>F814W, F606W (HST)</div></div>
+      <div class="ic"><div class="ic-l">Sky coverage</div><div class="ic-v sm">Southern sky (Phase I)<br>Northern sky (Phase II, ongoing)</div></div>
+      <div class="ic"><div class="ic-l">Last updated</div><div class="ic-v sm">24 Jun 2026</div></div>
+    </div>
+
+    <!-- Sky map -->
+    <div class="panel" style="margin-top:18px">
+      <div class="panel-hd">
+        <div class="panel-title">
+          <span class="picon"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><ellipse cx="7" cy="7" rx="6" ry="3.5"/><ellipse cx="7" cy="7" rx="6" ry="6"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="7" y1="1" x2="7" y2="13"/></svg></span>
+          Sky Distribution — Host Galaxies
+        </div>
+        <span style="font-size:11px;color:var(--fg3)">Aitoff projection · J2000 · RA centred at 0h</span>
+      </div>
+      <div class="skymap-wrap">
+        <svg id="skymap" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="skymap-legend">
+        <div class="sml-item"><div class="sml-dot" style="background:#1a7f37"></div> Confirmed GCs</div>
+        <div class="sml-item"><div class="sml-dot" style="background:#656d76"></div> Candidate GCs</div>
+        <div class="sml-item"><div class="sml-dot" style="background:#e8a82a;width:10px;height:10px"></div> Host galaxy</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="panel-title">
+          <span class="picon"><svg viewBox="0 0 14 14" fill="currentColor"><rect x="1" y="6" width="3" height="7" rx="0.5"/><rect x="5.5" y="3" width="3" height="10" rx="0.5"/><rect x="10" y="1" width="3" height="12" rx="0.5"/></svg></span>
+          Statistics
+        </div>
+        <span class="upd">Updated Jun 24 2026</span>
+      </div>
+      <table class="s-table">
+        <tr><td>Confirmed globular clusters</td><td>18,426</td></tr>
+        <tr><td class="ind">— Spectroscopically confirmed (published literature)</td><td>14,201</td></tr>
+        <tr><td class="ind">— Spectroscopically confirmed (this work, MUSE)</td><td>4,225</td></tr>
+        <tr><td>Candidate GCs (photometric / morphological)</td><td>23,114</td></tr>
+        <tr><td class="ind">— Space-based (HST/ACS, WFC3)</td><td>18,830</td></tr>
+        <tr><td class="ind">— Space-based (JWST/NIRCam)</td><td>4,284</td></tr>
+        <tr><td>Total catalogued objects</td><td>41,540</td></tr>
+        <tr><td>Host galaxies</td><td>612</td></tr>
+        <tr><td class="ind">— Elliptical / S0 (E/S0)</td><td>438</td></tr>
+        <tr><td class="ind">— Spiral / Irregular</td><td>174</td></tr>
+        <tr><td>Spectroscopic measurements (spectra)</td><td>5,907</td></tr>
+        <tr><td class="ind">— VLT/MUSE IFU</td><td>2,844</td></tr>
+        <tr><td class="ind">— Archival (VLT/FORS2, Gemini/GMOS, Keck/DEIMOS, AAT)</td><td>3,063</td></tr>
+        <tr><td>Metallicity estimates [Fe/H]</td><td>4,982</td></tr>
+        <tr><td>Sky coverage — Southern sky (Phase I)</td><td>completed</td></tr>
+        <tr><td>Sky coverage — Northern sky (Phase II)</td><td>in progress</td></tr>
+        <tr><td style="color:var(--fg2)">Contributors</td>
+          <td style="text-align:right;font-weight:400;font-style:italic;color:var(--fg2);font-size:12px">
+            Niranjana P., A. Chies-Santos, R. S. de Souza,<br>
+            J. Gschwend, N. Schweder-Souza + LSST Star Clusters community
+          </td></tr>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="panel-title">
+          <span class="picon"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="6"/><line x1="7" y1="6.5" x2="7" y2="10.5"/><circle cx="7" cy="4.5" r="0.6" fill="currentColor" stroke="none"/></svg></span>
+          About this portal
+        </div>
+      </div>
+      <div class="about">
+        <p>The <strong>Open Extragalactic Globular Cluster Portal</strong> compiles spectroscopically confirmed extragalactic globular clusters alongside space-based photometric candidates from HST and JWST imaging. The primary goal is to provide a clean, LSST-ready training set for photometric classification of GC candidates in the Rubin Observatory Legacy Survey of Space and Time.</p>
+        <p>Objects are classified as <em>confirmed</em> when a radial velocity and/or spectral index measurement places them kinematically or chemically consistent with GC membership of the host galaxy. <em>Candidates</em> are selected on morphological and colour grounds from high-resolution space imaging and have not yet received spectroscopic follow-up.</p>
+        <p>Photometry is provided in the SDSS/LSST filter system (u, g, r, i, z, y) where available, supplemented by HST passbands (F606W, F814W, F475W). Magnitudes are on the AB system. Coordinates are J2000.0 (ICRS).</p>
+      </div>
+    </div>
+
+    <div class="cite">
+      <strong>If you use this catalogue, please cite:</strong><br>
+      Prashantha N. et al. (2026), <em>The Open Extragalactic GC Portal</em>, A&amp;A (submitted) &middot;
+      <code>arXiv:2026.XXXXX</code> &middot;
+      <a href="#">DOI: 10.xxxx/xxxxxxx</a>
+      <div class="cite-note">
+        Also cite the original works that contributed data to this catalogue — full BibTeX references for all contributing studies are included in the <code>.bib</code> file downloaded alongside the catalogue.
+      </div>
+    </div>
+  </div>
+</div><!-- /view-home -->
+
+<!-- ─── CATALOGUE VIEW ──────────────────── -->
+<div id="view-cat" hidden>
+  <div class="pg-hd">
+    <div class="pg-hd-row">
+      <div>
+        <h2>All globular clusters</h2>
+        <p>Spectroscopically confirmed GCs and space-based candidates. Click column headers to sort.</p>
+      </div>
+      <div class="pg-acts">
+        <button class="btn btn-out btn-sm" onclick="nav(document.querySelector('[data-view=home]'),'home')">← Home</button>
+        <button class="btn btn-out btn-sm" id="btn-csv">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 13h12"/></svg>
+          Download CSV + BibTeX
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="fbar">
+    <input type="text" id="q-search" class="fc" placeholder="Search ID, galaxy, instrument…">
+    <span class="fsep"></span>
+    <span class="flbl">Type</span>
+    <select id="f-type" class="fc">
+      <option value="">All types</option>
+      <option value="confirmed">Confirmed GC</option>
+      <option value="candidate">Candidate GC</option>
+    </select>
+    <span class="flbl">Method</span>
+    <select id="f-method" class="fc">
+      <option value="">All methods</option>
+      <option value="spectroscopic">Spectroscopic</option>
+      <option value="HST">HST imaging</option>
+      <option value="JWST">JWST imaging</option>
+    </select>
+    <span class="flbl">Host</span>
+    <select id="f-host" class="fc">
+      <option value="">All hosts</option>
+    </select>
+    <span class="rcnt" id="rcnt"></span>
+  </div>
+
+  <div style="padding:0 40px 0">
+    <div class="tbl-panel">
+      <div class="twrap">
+        <table class="dtbl">
+          <thead>
+            <tr>
+              <th data-col="id">GC ID</th>
+              <th data-col="host">Host Galaxy</th>
+              <th data-col="ra">RA (J2000)</th>
+              <th data-col="dec">Dec (J2000)</th>
+              <th data-col="type">Class</th>
+              <th data-col="method">Method</th>
+              <th data-col="g" style="text-align:right">g</th>
+              <th data-col="r" style="text-align:right">r</th>
+              <th data-col="i" style="text-align:right">i</th>
+              <th data-col="z" style="text-align:right">z</th>
+              <th data-col="y" style="text-align:right">y</th>
+              <th data-col="gi" style="text-align:right">g−i</th>
+              <th data-col="feh" style="text-align:right">[Fe/H]</th>
+              <th data-col="vr" style="text-align:right">v<sub>r</sub> (km/s)</th>
+              <th data-col="instr">Instrument</th>
+              <th data-col="ref">Reference</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="16" class="no-res">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <div class="pgi" id="pgi"></div>
+        <div class="pgb" id="pgb"></div>
+      </div>
+    </div>
+
+    <p class="col-notes">
+      <strong>Notes:</strong> Magnitudes AB (SDSS/LSST ugrizy filter set). g−i colour index: blue GCs ≲ 0.90, red GCs ≳ 0.95.
+      [Fe/H] from Lick indices or full spectral fitting (dex). v<sub>r</sub> = heliocentric radial velocity. — = not measured.
+    </p>
+
+    <div class="cite" style="margin-bottom:48px">
+      <strong>If you use this catalogue, please cite:</strong><br>
+      Prashantha N. et al. (2026), <em>The Open Extragalactic GC Portal</em>, A&amp;A (submitted) &middot;
+      <code>arXiv:2026.XXXXX</code> &middot; <a href="#">DOI: 10.xxxx/xxxxxxx</a>
+      <div class="cite-note">
+        Also cite the original works that contributed data to this catalogue — full BibTeX references for all contributing studies are included in the <code>.bib</code> file downloaded alongside the catalogue (use the <em>Download CSV + BibTeX</em> button above).
+      </div>
+    </div>
+  </div>
+</div><!-- /view-cat -->
+
+<!-- ─── UPLOAD MODAL ────────────────────── -->
+<div class="modal-backdrop" id="upload-modal" hidden>
+  <div class="modal">
+    <div class="modal-title">Contribute GC Data</div>
+    <div class="modal-note">
+      Data submitted here will be reviewed by the EAT Group before inclusion. All contributed datasets must be accompanied by a citable publication or preprint. Fields marked with * are required.
+    </div>
+    <div class="form-row">
+      <label class="form-label">Host Galaxy *</label>
+      <input type="text" class="form-input" placeholder="e.g. NGC 4486, M87">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Contributor Name(s) *</label>
+      <input type="text" class="form-input" placeholder="e.g. Author et al. (2026)">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Contact Email *</label>
+      <input type="email" class="form-input" placeholder="your@institution.edu">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Citation / Reference *</label>
+      <textarea class="form-input" rows="3" placeholder="ADS link, arXiv ID, DOI, or full BibTeX entry&#10;e.g. https://ui.adsabs.harvard.edu/abs/2026XXXXX&#10;or   arXiv:2026.XXXXX"></textarea>
+      <div class="form-hint">Please provide a citable reference for the data being contributed. ADS link, arXiv ID, or DOI preferred. This reference will be included in the <code>.bib</code> file exported with the catalogue.</div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Data file (CSV or FITS) *</label>
+      <input type="file" class="form-input" accept=".csv,.fits,.fit,.txt" style="height:auto;padding:5px 10px;">
+      <div class="form-hint">CSV or FITS format. See documentation for the required column schema (GC ID, RA, Dec, classification, magnitudes, etc.).</div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Notes (optional)</label>
+      <textarea class="form-input" rows="2" placeholder="Any caveats, selection criteria, or notes for the review team…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-out btn-sm" onclick="document.getElementById('upload-modal').hidden=true">Cancel</button>
+      <button class="btn btn-pri btn-sm">Submit for review</button>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+/* ── View switching ──────────────────────────────────────── */
+function nav(btn, view) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('view-home').hidden = (view !== 'home');
+  document.getElementById('view-cat').hidden  = (view !== 'cat');
+}
+
+/* ── Mock catalogue data ─────────────────────────────────── */
+const GC = [
+  /* NGC 4486 (M87) · E0p · d=16.4 Mpc · v_sys=1307 km/s */
+  {id:"EGC-4486-0001",host:"NGC 4486",ht:"E0p",ra:"12:30:46.83",dec:"+12:23:09.2",type:"confirmed",method:"spectroscopic",g:23.41,r:22.89,i:22.61,z:22.43,y:22.51,gi:0.80,feh:-1.54,vr:1089,instr:"VLT/MUSE",    ref:"Prashantha+2026"},
+  {id:"EGC-4486-0002",host:"NGC 4486",ht:"E0p",ra:"12:30:52.17",dec:"+12:24:31.5",type:"confirmed",method:"spectroscopic",g:23.88,r:23.22,i:22.85,z:22.70,y:22.79,gi:1.03,feh:-0.51,vr:1421,instr:"VLT/MUSE",    ref:"Prashantha+2026"},
+  {id:"EGC-4486-0003",host:"NGC 4486",ht:"E0p",ra:"12:30:44.02",dec:"+12:22:58.7",type:"confirmed",method:"spectroscopic",g:24.12,r:23.51,i:23.21,z:23.03,y:23.12,gi:0.91,feh:-1.12,vr:1673,instr:"VLT/MUSE",    ref:"Prashantha+2026"},
+  {id:"EGC-4486-0004",host:"NGC 4486",ht:"E0p",ra:"12:30:58.44",dec:"+12:23:47.0",type:"confirmed",method:"spectroscopic",g:22.97,r:22.36,i:22.07,z:21.91,y:21.99,gi:0.90,feh:-0.72,vr:954, instr:"Keck/DEIMOS",ref:"Zhang+2015"},
+  {id:"EGC-4486-0005",host:"NGC 4486",ht:"E0p",ra:"12:30:40.91",dec:"+12:25:14.2",type:"confirmed",method:"spectroscopic",g:24.55,r:23.87,i:23.54,z:23.38,y:23.47,gi:1.01,feh:-0.63,vr:1185,instr:"Gemini/GMOS", ref:"Strader+2011"},
+  {id:"EGC-4486-0006",host:"NGC 4486",ht:"E0p",ra:"12:31:02.33",dec:"+12:21:55.3",type:"confirmed",method:"spectroscopic",g:23.62,r:23.03,i:22.78,z:22.60,y:22.68,gi:0.84,feh:-1.43,vr:1882,instr:"VLT/MUSE",    ref:"Prashantha+2026"},
+  {id:"EGC-4486-0007",host:"NGC 4486",ht:"E0p",ra:"12:30:49.77",dec:"+12:26:08.8",type:"candidate",method:"HST",          g:25.01,r:24.42,i:24.17,z:24.02,y:null, gi:0.84,feh:null, vr:null, instr:"HST/ACS",    ref:"Jordan+2009"},
+  {id:"EGC-4486-0008",host:"NGC 4486",ht:"E0p",ra:"12:30:36.18",dec:"+12:22:30.1",type:"confirmed",method:"spectroscopic",g:24.28,r:23.67,i:23.35,z:23.17,y:23.26,gi:0.93,feh:-0.90,vr:719, instr:"VLT/FORS2",   ref:"Hanes+2001"},
+  {id:"EGC-4486-0009",host:"NGC 4486",ht:"E0p",ra:"12:30:55.61",dec:"+12:20:42.6",type:"candidate",method:"JWST",         g:25.34,r:24.73,i:24.45,z:24.28,y:24.37,gi:0.89,feh:null, vr:null, instr:"JWST/NIRCam",ref:"Lim+2024"},
+  {id:"EGC-4486-0010",host:"NGC 4486",ht:"E0p",ra:"12:30:43.55",dec:"+12:24:55.0",type:"confirmed",method:"spectroscopic",g:23.77,r:23.18,i:22.88,z:22.70,y:22.79,gi:0.89,feh:-1.20,vr:1540,instr:"VLT/MUSE",    ref:"Prashantha+2026"},
+  /* NGC 1399 · E1 · Fornax · d=20.0 Mpc · v_sys=1425 km/s */
+  {id:"EGC-1399-0001",host:"NGC 1399",ht:"E1",ra:"03:38:25.14",dec:"-35:27:44.2",type:"confirmed",method:"spectroscopic",g:24.05,r:23.41,i:23.10,z:22.93,y:23.02,gi:0.95,feh:-0.82,vr:1213,instr:"VLT/FORS2",  ref:"Richtler+2008"},
+  {id:"EGC-1399-0002",host:"NGC 1399",ht:"E1",ra:"03:38:33.79",dec:"-35:26:31.0",type:"confirmed",method:"spectroscopic",g:23.81,r:23.20,i:22.94,z:22.78,y:22.87,gi:0.87,feh:-1.31,vr:1688,instr:"VLT/FORS2",  ref:"Richtler+2008"},
+  {id:"EGC-1399-0003",host:"NGC 1399",ht:"E1",ra:"03:38:19.06",dec:"-35:28:17.5",type:"confirmed",method:"spectroscopic",g:24.39,r:23.74,i:23.43,z:23.26,y:23.35,gi:0.96,feh:-0.67,vr:1071,instr:"Gemini/GMOS", ref:"Pota+2018"},
+  {id:"EGC-1399-0004",host:"NGC 1399",ht:"E1",ra:"03:38:41.22",dec:"-35:29:05.8",type:"confirmed",method:"spectroscopic",g:23.57,r:22.95,i:22.66,z:22.50,y:22.59,gi:0.91,feh:-0.98,vr:1530,instr:"VLT/MUSE",    ref:"Fahrion+2020"},
+  {id:"EGC-1399-0005",host:"NGC 1399",ht:"E1",ra:"03:38:28.55",dec:"-35:25:49.3",type:"candidate",method:"HST",          g:24.90,r:24.28,i:24.02,z:23.86,y:null, gi:0.88,feh:null, vr:null, instr:"HST/ACS",    ref:"Jordan+2007"},
+  {id:"EGC-1399-0006",host:"NGC 1399",ht:"E1",ra:"03:38:22.88",dec:"-35:27:02.1",type:"confirmed",method:"spectroscopic",g:24.62,r:24.01,i:23.72,z:23.56,y:23.65,gi:0.90,feh:-1.10,vr:1840,instr:"VLT/MUSE",    ref:"Fahrion+2020"},
+  {id:"EGC-1399-0007",host:"NGC 1399",ht:"E1",ra:"03:38:36.40",dec:"-35:26:10.4",type:"confirmed",method:"spectroscopic",g:23.44,r:22.81,i:22.50,z:22.33,y:22.42,gi:0.94,feh:-0.45,vr:1104,instr:"VLT/FORS2",  ref:"Richtler+2008"},
+  {id:"EGC-1399-0008",host:"NGC 1399",ht:"E1",ra:"03:38:14.71",dec:"-35:28:54.6",type:"candidate",method:"HST",          g:25.18,r:24.55,i:24.25,z:24.08,y:null, gi:0.93,feh:null, vr:null, instr:"HST/WFC3",   ref:"Puzia+2014"},
+  /* NGC 5128 (Cen A) · S0p · d=3.8 Mpc · v_sys=547 km/s */
+  {id:"EGC-5128-0001",host:"NGC 5128",ht:"S0p",ra:"13:25:18.42",dec:"-43:01:50.3",type:"confirmed",method:"spectroscopic",g:19.34,r:18.77,i:18.49,z:18.32,y:18.41,gi:0.85,feh:-1.47,vr:389, instr:"AAT/2dF",     ref:"Woodley+2010"},
+  {id:"EGC-5128-0002",host:"NGC 5128",ht:"S0p",ra:"13:25:31.18",dec:"-43:00:22.7",type:"confirmed",method:"spectroscopic",g:20.12,r:19.49,i:19.18,z:19.00,y:19.09,gi:0.94,feh:-0.58,vr:694, instr:"VLT/VIMOS",   ref:"Beasley+2008"},
+  {id:"EGC-5128-0003",host:"NGC 5128",ht:"S0p",ra:"13:25:24.77",dec:"-43:02:38.1",type:"confirmed",method:"spectroscopic",g:19.88,r:19.26,i:18.97,z:18.80,y:18.89,gi:0.91,feh:-0.83,vr:511, instr:"AAT/2dF",     ref:"Woodley+2010"},
+  {id:"EGC-5128-0004",host:"NGC 5128",ht:"S0p",ra:"13:25:09.63",dec:"-43:01:14.9",type:"confirmed",method:"spectroscopic",g:20.56,r:19.95,i:19.67,z:19.51,y:19.60,gi:0.89,feh:-1.18,vr:801, instr:"VLT/VIMOS",   ref:"Beasley+2008"},
+  {id:"EGC-5128-0005",host:"NGC 5128",ht:"S0p",ra:"13:25:38.02",dec:"-43:00:55.2",type:"confirmed",method:"spectroscopic",g:18.91,r:18.30,i:18.01,z:17.85,y:17.94,gi:0.90,feh:-0.73,vr:417, instr:"Gemini/GMOS",  ref:"Rejkuba+2007"},
+  {id:"EGC-5128-0006",host:"NGC 5128",ht:"S0p",ra:"13:25:15.89",dec:"-43:03:01.4",type:"candidate",method:"HST",          g:21.30,r:20.70,i:20.43,z:20.27,y:null, gi:0.87,feh:null, vr:null, instr:"HST/ACS",    ref:"Harris+2002"},
+  {id:"EGC-5128-0007",host:"NGC 5128",ht:"S0p",ra:"13:25:44.31",dec:"-42:59:38.8",type:"confirmed",method:"spectroscopic",g:20.83,r:20.22,i:19.93,z:19.76,y:19.85,gi:0.90,feh:-1.01,vr:563, instr:"AAT/2dF",     ref:"Woodley+2010"},
+  {id:"EGC-5128-0008",host:"NGC 5128",ht:"S0p",ra:"13:25:27.55",dec:"-43:01:29.7",type:"candidate",method:"JWST",         g:21.67,r:21.05,i:20.76,z:20.59,y:20.68,gi:0.91,feh:null, vr:null, instr:"JWST/NIRCam",ref:"Lim+2024"},
+  /* M31 (NGC 224) · SAb · d=0.78 Mpc · v_sys=−301 km/s */
+  {id:"EGC-0224-0001",host:"M31",     ht:"SAb",ra:"00:42:43.87",dec:"+41:15:09.0",type:"confirmed",method:"spectroscopic",g:16.14,r:15.51,i:15.21,z:15.04,y:15.13,gi:0.93,feh:-0.55,vr:-239,instr:"MMT/Hectospec",ref:"Caldwell+2011"},
+  {id:"EGC-0224-0002",host:"M31",     ht:"SAb",ra:"00:43:02.11",dec:"+41:17:44.3",type:"confirmed",method:"spectroscopic",g:17.38,r:16.77,i:16.48,z:16.31,y:16.40,gi:0.90,feh:-1.60,vr:-312,instr:"MMT/Hectospec",ref:"Caldwell+2011"},
+  {id:"EGC-0224-0003",host:"M31",     ht:"SAb",ra:"00:42:31.54",dec:"+41:16:25.8",type:"confirmed",method:"spectroscopic",g:15.78,r:15.15,i:14.85,z:14.68,y:14.77,gi:0.93,feh:-0.42,vr:-188,instr:"Keck/DEIMOS",  ref:"Perrett+2002"},
+  {id:"EGC-0224-0004",host:"M31",     ht:"SAb",ra:"00:42:58.77",dec:"+41:14:52.5",type:"confirmed",method:"spectroscopic",g:17.81,r:17.18,i:16.87,z:16.69,y:16.78,gi:0.94,feh:-1.23,vr:-405,instr:"MMT/Hectospec",ref:"Caldwell+2011"},
+  {id:"EGC-0224-0005",host:"M31",     ht:"SAb",ra:"00:42:18.23",dec:"+41:18:37.1",type:"confirmed",method:"spectroscopic",g:16.55,r:15.92,i:15.61,z:15.43,y:15.52,gi:0.94,feh:-0.78,vr:-271,instr:"Keck/DEIMOS",  ref:"Veljanoski+2014"},
+  /* NGC 3115 · S0 · d=9.4 Mpc · v_sys=720 km/s */
+  {id:"EGC-3115-0001",host:"NGC 3115",ht:"S0",ra:"10:05:10.55",dec:"-07:43:22.4",type:"confirmed",method:"spectroscopic",g:22.15,r:21.55,i:21.27,z:21.11,y:21.20,gi:0.88,feh:-1.39,vr:612, instr:"Keck/DEIMOS",  ref:"Usher+2015"},
+  {id:"EGC-3115-0002",host:"NGC 3115",ht:"S0",ra:"10:05:18.33",dec:"-07:42:55.0",type:"confirmed",method:"spectroscopic",g:22.67,r:22.06,i:21.77,z:21.60,y:21.69,gi:0.90,feh:-0.66,vr:835, instr:"Keck/DEIMOS",  ref:"Usher+2015"},
+  {id:"EGC-3115-0003",host:"NGC 3115",ht:"S0",ra:"10:05:06.21",dec:"-07:44:01.7",type:"confirmed",method:"spectroscopic",g:21.88,r:21.27,i:20.97,z:20.80,y:20.89,gi:0.91,feh:-0.49,vr:544, instr:"VLT/MUSE",    ref:"Pinna+2019"},
+  {id:"EGC-3115-0004",host:"NGC 3115",ht:"S0",ra:"10:05:22.87",dec:"-07:43:38.9",type:"candidate",method:"HST",          g:23.44,r:22.82,i:22.53,z:22.36,y:null, gi:0.91,feh:null, vr:null, instr:"HST/ACS",    ref:"Jennings+2014"},
+  /* NGC 4472 (M49) · E2 · Virgo · d=16.7 Mpc · v_sys=952 km/s */
+  {id:"EGC-4472-0001",host:"NGC 4472",ht:"E2",ra:"12:29:45.32",dec:"+08:00:20.5",type:"confirmed",method:"spectroscopic",g:23.52,r:22.89,i:22.58,z:22.40,y:22.49,gi:0.94,feh:-0.61,vr:812, instr:"Keck/LRIS",    ref:"Côté+2003"},
+  {id:"EGC-4472-0002",host:"NGC 4472",ht:"E2",ra:"12:29:53.71",dec:"+07:59:33.0",type:"confirmed",method:"spectroscopic",g:23.94,r:23.31,i:23.01,z:22.83,y:22.92,gi:0.93,feh:-0.76,vr:1092,instr:"Keck/LRIS",    ref:"Côté+2003"},
+  {id:"EGC-4472-0003",host:"NGC 4472",ht:"E2",ra:"12:29:40.18",dec:"+08:01:14.8",type:"confirmed",method:"spectroscopic",g:24.27,r:23.66,i:23.38,z:23.22,y:23.31,gi:0.89,feh:-1.25,vr:1348,instr:"Gemini/GMOS",  ref:"Strader+2007"},
+  {id:"EGC-4472-0004",host:"NGC 4472",ht:"E2",ra:"12:29:58.43",dec:"+08:00:47.3",type:"candidate",method:"HST",          g:24.78,r:24.17,i:23.89,z:23.73,y:null, gi:0.89,feh:null, vr:null, instr:"HST/ACS",    ref:"Jordan+2009"},
+  /* NGC 1052 · E4 · d=19.4 Mpc · v_sys=1510 km/s */
+  {id:"EGC-1052-0001",host:"NGC 1052",ht:"E4",ra:"02:41:06.22",dec:"-08:15:23.7",type:"confirmed",method:"spectroscopic",g:24.18,r:23.55,i:23.25,z:23.08,y:23.17,gi:0.93,feh:-0.82,vr:1348,instr:"Keck/DEIMOS",  ref:"Forbes+2001"},
+  {id:"EGC-1052-0002",host:"NGC 1052",ht:"E4",ra:"02:41:11.85",dec:"-08:14:50.2",type:"confirmed",method:"spectroscopic",g:24.56,r:23.93,i:23.63,z:23.46,y:23.55,gi:0.93,feh:-1.05,vr:1701,instr:"Keck/DEIMOS",  ref:"Forbes+2001"},
+  {id:"EGC-1052-0003",host:"NGC 1052",ht:"E4",ra:"02:40:59.77",dec:"-08:15:58.3",type:"candidate",method:"HST",          g:25.12,r:24.49,i:24.19,z:24.02,y:null, gi:0.93,feh:null, vr:null, instr:"HST/ACS",    ref:"vanDokkum+2018"},
+  /* NGC 4552 (M89) · E0 · Virgo · d=15.4 Mpc · v_sys=340 km/s */
+  {id:"EGC-4552-0001",host:"NGC 4552",ht:"E0",ra:"12:35:40.05",dec:"+12:33:22.4",type:"confirmed",method:"spectroscopic",g:23.17,r:22.56,i:22.28,z:22.12,y:22.21,gi:0.89,feh:-1.34,vr:218, instr:"VLT/MUSE",    ref:"Prashantha+2026"},
+  {id:"EGC-4552-0002",host:"NGC 4552",ht:"E0",ra:"12:35:44.62",dec:"+12:34:11.7",type:"confirmed",method:"spectroscopic",g:23.70,r:23.08,i:22.79,z:22.62,y:22.71,gi:0.91,feh:-0.59,vr:462, instr:"VLT/MUSE",    ref:"Prashantha+2026"},
+  {id:"EGC-4552-0003",host:"NGC 4552",ht:"E0",ra:"12:35:35.18",dec:"+12:32:44.0",type:"candidate",method:"JWST",         g:24.91,r:24.29,i:24.00,z:23.83,y:23.92,gi:0.91,feh:null, vr:null, instr:"JWST/NIRCam",ref:"Lim+2024"},
+];
+
+/* ── BibTeX generation ───────────────────────────────────── */
+function generateBib() {
+  const bibDB = {
+    'Prashantha+2026': `@article{Prashantha2026,\n  author  = {Prashantha, N. and Chies-Santos, A. and de Souza, R.~S. and Gschwend, J. and Schweder-Souza, N.},\n  title   = {The Open Extragalactic Globular Cluster Portal},\n  journal = {A\\&A},\n  year    = {2026},\n  note    = {submitted},\n  eprint  = {2026.XXXXX},\n  archivePrefix = {arXiv}\n}`,
+    'Zhang+2015':     `@article{Zhang2015,\n  author  = {Zhang, H.-X. and Peng, E.~W. and C{\\^o}t{\\'e}, P. and others},\n  title   = {The Next Generation Virgo Cluster Survey. VII.},\n  journal = {ApJ},\n  year    = {2015},\n  volume  = {802},\n  pages   = {30}\n}`,
+    'Strader+2011':   `@article{Strader2011,\n  author  = {Strader, J. and others},\n  title   = {Wide-field Photometry of the M87 Globular Cluster System},\n  journal = {ApJS},\n  year    = {2011},\n  volume  = {197},\n  pages   = {33}\n}`,
+    'Jordan+2009':    `@article{Jordan2009,\n  author  = {Jord{\\'{a}}n, A. and others},\n  title   = {The ACS Virgo Cluster Survey. XVII.},\n  journal = {ApJS},\n  year    = {2009},\n  volume  = {180},\n  pages   = {54}\n}`,
+    'Hanes+2001':     `@article{Hanes2001,\n  author  = {Hanes, D.~A. and others},\n  year    = {2001},\n  journal = {ApJ},\n  volume  = {559},\n  pages   = {812}\n}`,
+    'Lim+2024':       `@article{Lim2024,\n  author  = {Lim, S. and others},\n  year    = {2024},\n  journal = {ApJ},\n  note    = {JWST NIRCam GC survey}\n}`,
+    'Richtler+2008':  `@article{Richtler2008,\n  author  = {Richtler, T. and others},\n  year    = {2008},\n  journal = {AJ},\n  volume  = {135},\n  pages   = {1482}\n}`,
+    'Fahrion+2020':   `@article{Fahrion2020,\n  author  = {Fahrion, K. and others},\n  year    = {2020},\n  journal = {A\\&A},\n  volume  = {637},\n  pages   = {A26}\n}`,
+    'Pota+2018':      `@article{Pota2018,\n  author  = {Pota, V. and others},\n  year    = {2018},\n  journal = {MNRAS},\n  volume  = {481},\n  pages   = {4472}\n}`,
+    'Jordan+2007':    `@article{Jordan2007,\n  author  = {Jord{\\'{a}}n, A. and others},\n  year    = {2007},\n  journal = {ApJS},\n  volume  = {171},\n  pages   = {101}\n}`,
+    'Puzia+2014':     `@article{Puzia2014,\n  author  = {Puzia, T.~H. and others},\n  year    = {2014},\n  journal = {ApJ},\n  volume  = {786},\n  pages   = {78}\n}`,
+    'Woodley+2010':   `@article{Woodley2010,\n  author  = {Woodley, K.~A. and others},\n  year    = {2010},\n  journal = {AJ},\n  volume  = {139},\n  pages   = {1871}\n}`,
+    'Beasley+2008':   `@article{Beasley2008,\n  author  = {Beasley, M.~A. and others},\n  year    = {2008},\n  journal = {MNRAS},\n  volume  = {386},\n  pages   = {1443}\n}`,
+    'Rejkuba+2007':   `@article{Rejkuba2007,\n  author  = {Rejkuba, M. and others},\n  year    = {2007},\n  journal = {A\\&A},\n  volume  = {462},\n  pages   = {411}\n}`,
+    'Harris+2002':    `@article{Harris2002,\n  author  = {Harris, W.~E. and others},\n  year    = {2002},\n  journal = {AJ},\n  volume  = {124},\n  pages   = {1435}\n}`,
+    'Caldwell+2011':  `@article{Caldwell2011,\n  author  = {Caldwell, N. and others},\n  year    = {2011},\n  journal = {AJ},\n  volume  = {141},\n  pages   = {61}\n}`,
+    'Perrett+2002':   `@article{Perrett2002,\n  author  = {Perrett, K.~M. and others},\n  year    = {2002},\n  journal = {AJ},\n  volume  = {123},\n  pages   = {2490}\n}`,
+    'Veljanoski+2014':`@article{Veljanoski2014,\n  author  = {Veljanoski, J. and others},\n  year    = {2014},\n  journal = {MNRAS},\n  volume  = {442},\n  pages   = {2929}\n}`,
+    'Usher+2015':     `@article{Usher2015,\n  author  = {Usher, C. and others},\n  year    = {2015},\n  journal = {MNRAS},\n  volume  = {446},\n  pages   = {369}\n}`,
+    'Pinna+2019':     `@article{Pinna2019,\n  author  = {Pinna, F. and others},\n  year    = {2019},\n  journal = {A\\&A},\n  volume  = {623},\n  pages   = {A19}\n}`,
+    'Jennings+2014':  `@article{Jennings2014,\n  author  = {Jennings, Z.~G. and others},\n  year    = {2014},\n  journal = {AJ},\n  volume  = {148},\n  pages   = {32}\n}`,
+    'Côté+2003':      `@article{Cote2003,\n  author  = {C{\\^o}t{\\'e}, P. and others},\n  year    = {2003},\n  journal = {ApJ},\n  volume  = {592},\n  pages   = {404}\n}`,
+    'Strader+2007':   `@article{Strader2007,\n  author  = {Strader, J. and others},\n  year    = {2007},\n  journal = {ApJS},\n  volume  = {171},\n  pages   = {137}\n}`,
+    'Forbes+2001':    `@article{Forbes2001,\n  author  = {Forbes, D.~A. and others},\n  year    = {2001},\n  journal = {ApJ},\n  volume  = {556},\n  pages   = {83}\n}`,
+    'vanDokkum+2018': `@article{vanDokkum2018,\n  author  = {{van Dokkum}, P. and others},\n  year    = {2018},\n  journal = {Nature},\n  volume  = {555},\n  pages   = {629}\n}`,
+  };
+  const header = `% GC Portal v0.01 — BibTeX references\n% Prashantha N. et al. (2026)\n% Generated ${new Date().toISOString().slice(0,10)}\n% Please cite all entries relevant to the data you use.\n\n`;
+  const uniqueRefs = [...new Set(GC.map(d => d.ref))].sort();
+  return header + uniqueRefs.map(r => bibDB[r] || `% ${r} — BibTeX entry not yet available`).join('\n\n');
+}
+
+function downloadBib(dataSource) {
+  const bibContent = generateBib();
+  const b = document.createElement('a');
+  b.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(bibContent);
+  b.download = 'gc-portal-v001.bib';
+  b.click();
+}
+
+/* ── Catalogue state ─────────────────────────────────────── */
+let filtered = [...GC];
+let sortCol = null, sortDir = 'asc', page = 1;
+const PER = 15;
+
+function fmt(v, d=2) {
+  if (v === null || v === undefined) return '<span class="nv">—</span>';
+  return (+v).toFixed(d);
+}
+function typeBadge(t) {
+  return t === 'confirmed'
+    ? '<span class="badge bok">Confirmed</span>'
+    : '<span class="badge bmu">Candidate</span>';
+}
+function methBadge(m) {
+  if (m === 'spectroscopic') return '<span class="badge bbl">Spectroscopic</span>';
+  if (m === 'HST')           return '<span class="badge bpu">HST</span>';
+  if (m === 'JWST')          return '<span class="badge bgo">JWST</span>';
+  return m;
+}
+
+function applyFilters() {
+  const q = (document.getElementById('q-search').value||'').toLowerCase();
+  const ft = document.getElementById('f-type').value;
+  const fm = document.getElementById('f-method').value;
+  const fh = document.getElementById('f-host').value;
+  filtered = GC.filter(d => {
+    if (ft && d.type !== ft) return false;
+    if (fm && d.method !== fm) return false;
+    if (fh && d.host !== fh) return false;
+    if (q && ![d.id,d.host,d.ra,d.dec,d.instr,d.ref].join(' ').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  if (sortCol) sortData(false);
+  page = 1;
+  render();
+}
+
+function sortData(toggle=true) {
+  if (toggle) {
+    sortDir = (sortCol === event.currentTarget.dataset.col && sortDir==='asc') ? 'desc' : 'asc';
+    sortCol = event.currentTarget.dataset.col;
+  }
+  filtered.sort((a,b)=>{
+    let va=a[sortCol], vb=b[sortCol];
+    const big = sortDir==='asc' ? Infinity : -Infinity;
+    if (va===null||va===undefined) va=big;
+    if (vb===null||vb===undefined) vb=big;
+    if (typeof va==='string') return sortDir==='asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    return sortDir==='asc' ? va-vb : vb-va;
+  });
+}
+
+function render() {
+  const tbody = document.getElementById('tbody');
+  const sl = filtered.slice((page-1)*PER, page*PER);
+  document.getElementById('rcnt').textContent = filtered.length + ' object' + (filtered.length!==1?'s':'');
+  if (!sl.length) {
+    tbody.innerHTML = '<tr><td colspan="16" class="no-res">No objects match the current filters.</td></tr>';
+  } else {
+    tbody.innerHTML = sl.map(d=>`<tr>
+      <td class="idc">${d.id}</td>
+      <td><a href="#">${d.host}</a></td>
+      <td class="mono">${d.ra}</td>
+      <td class="mono">${d.dec}</td>
+      <td>${typeBadge(d.type)}</td>
+      <td>${methBadge(d.method)}</td>
+      <td class="num">${fmt(d.g)}</td>
+      <td class="num">${fmt(d.r)}</td>
+      <td class="num">${fmt(d.i)}</td>
+      <td class="num">${fmt(d.z)}</td>
+      <td class="num">${fmt(d.y)}</td>
+      <td class="num">${fmt(d.gi)}</td>
+      <td class="num">${fmt(d.feh)}</td>
+      <td class="num">${d.vr!==null?d.vr:'<span class="nv">—</span>'}</td>
+      <td style="font-size:11px;color:var(--fg2)">${d.instr}</td>
+      <td style="font-size:11px;color:var(--fg2)">${d.ref}</td>
+    </tr>`).join('');
+  }
+  document.querySelectorAll('.dtbl thead th[data-col]').forEach(th => {
+    th.classList.remove('sa','sd');
+    if (th.dataset.col===sortCol) th.classList.add(sortDir==='asc'?'sa':'sd');
+  });
+  renderPager();
+}
+
+function renderPager() {
+  const total = Math.ceil(filtered.length/PER);
+  const s=(page-1)*PER+1, e=Math.min(page*PER,filtered.length);
+  document.getElementById('pgi').textContent =
+    filtered.length ? `Showing ${s}–${e} of ${filtered.length}` : 'No results';
+  const pgb = document.getElementById('pgb');
+  let h = `<button class="pgbtn" id="pprev" ${page<=1?'disabled':''}>‹</button>`;
+  for (let p=1;p<=total;p++) h+=`<button class="pgbtn ${p===page?'cur':''}" data-p="${p}">${p}</button>`;
+  h+=`<button class="pgbtn" id="pnext" ${page>=total||!total?'disabled':''}>›</button>`;
+  pgb.innerHTML = h;
+  pgb.querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>{page=+b.dataset.p;render();}));
+  const pr=pgb.querySelector('#pprev'), nx=pgb.querySelector('#pnext');
+  if(pr) pr.addEventListener('click',()=>{page--;render();});
+  if(nx) nx.addEventListener('click',()=>{page++;render();});
+}
+
+function setFilter(type, method, host) {
+  setTimeout(()=>{
+    if (type)   { document.getElementById('f-type').value=type; }
+    if (method) { document.getElementById('f-method').value=method; }
+    if (host)   { document.getElementById('f-host').value=host; }
+    applyFilters();
+  }, 0);
+}
+
+function downloadCsvAndBib(data) {
+  const cols=['id','host','ht','ra','dec','type','method','g','r','i','z','y','gi','feh','vr','instr','ref'];
+  const hdr='GC_ID,Host_Galaxy,Galaxy_Type,RA_J2000,Dec_J2000,Classification,Detection_Method,g_mag,r_mag,i_mag,z_mag,y_mag,g_minus_i,[Fe_H],v_r_km_s,Instrument,Reference';
+  const rows=data.map(d=>cols.map(c=>d[c]??'').join(','));
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent([hdr,...rows].join('\n'));
+  a.download='gc-portal-v001.csv'; a.click();
+  // slight delay so both downloads register
+  setTimeout(()=>downloadBib(), 300);
+}
+
+/* ── Init ─────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  // Populate host dropdown
+  const sel = document.getElementById('f-host');
+  [...new Set(GC.map(d=>d.host))].sort().forEach(h=>{
+    const o=document.createElement('option'); o.value=h; o.textContent=h; sel.appendChild(o);
+  });
+
+  // Wire filters
+  ['q-search','f-type','f-method','f-host'].forEach(id =>
+    document.getElementById(id).addEventListener('input', applyFilters));
+  document.getElementById('f-type').addEventListener('change',applyFilters);
+  document.getElementById('f-method').addEventListener('change',applyFilters);
+  document.getElementById('f-host').addEventListener('change',applyFilters);
+
+  // Sort headers
+  document.querySelectorAll('.dtbl thead th[data-col]').forEach(th =>
+    th.addEventListener('click', e => { sortData(true); render(); }));
+
+  // CSV + BibTeX download (catalogue view)
+  document.getElementById('btn-csv').addEventListener('click', ()=>{
+    downloadCsvAndBib(filtered);
+  });
+
+  // Download button in hero (full dataset)
+  document.getElementById('btn-dl-hero')?.addEventListener('click', ()=>{
+    downloadCsvAndBib(GC);
+  });
+
+  // Upload modal
+  document.getElementById('btn-upload').addEventListener('click', ()=>{
+    document.getElementById('upload-modal').hidden = false;
+  });
+  // Close modal on backdrop click
+  document.getElementById('upload-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.hidden = true;
+  });
+
+  // Sky map — Aitoff projection
+  (function drawSkyMap() {
+    const svg = document.getElementById('skymap');
+    if (!svg) return;
+    const W=800, H=400, cx=W/2, cy=H/2, scale=cx/Math.PI;
+
+    function aitoff(raDeg, decDeg) {
+      const lam = (raDeg - 180) * Math.PI / 180;
+      const phi = decDeg * Math.PI / 180;
+      const alpha = Math.acos(Math.max(-1,Math.min(1,Math.cos(phi) * Math.cos(lam / 2))));
+      const sinc = alpha < 1e-9 ? 1 : Math.sin(alpha) / alpha;
+      const x = cx + scale * 2 * Math.cos(phi) * Math.sin(lam / 2) / sinc;
+      const y = cy - scale * Math.sin(phi) / sinc;
+      return [x, y];
+    }
+
+    const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches;
+    const c = {
+      bg:    dark ? '#0d1117' : '#f5f7fb',
+      grid:  dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)',
+      rim:   dark ? 'rgba(255,255,255,0.12)' : 'rgba(30,58,95,0.15)',
+      label: dark ? '#4a5568' : '#9198a1',
+      gp:    dark ? 'rgba(232,168,42,0.18)' : 'rgba(232,168,42,0.30)',
+    };
+
+    function el(tag, attrs) {
+      const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
+      return e;
+    }
+
+    svg.appendChild(el('ellipse',{cx,cy,rx:cx,ry:cy,fill:c.bg,stroke:c.rim,'stroke-width':'1'}));
+
+    for (const dec of [-60,-30,0,30,60]) {
+      const pts=[];
+      for (let ra=0;ra<=360;ra+=2) pts.push(aitoff(ra,dec).join(','));
+      svg.appendChild(el('polyline',{points:pts.join(' '),fill:'none',stroke:c.grid,'stroke-width':'0.7'}));
+      if (dec!==0) {
+        const [lx,ly]=aitoff(0,dec);
+        const t=el('text',{x:lx+4,y:ly+3,'font-size':'9','fill':c.label,'font-family':'system-ui'});
+        t.textContent=`${dec>0?'+':''}${dec}°`;
+        svg.appendChild(t);
+      }
+    }
+    { const pts=[]; for(let ra=0;ra<=360;ra+=2) pts.push(aitoff(ra,0).join(',')); svg.appendChild(el('polyline',{points:pts.join(' '),fill:'none',stroke:dark?'rgba(255,255,255,0.14)':'rgba(30,58,95,0.14)','stroke-width':'1.2'})); }
+
+    for (let ra=0;ra<360;ra+=30) {
+      const pts=[];
+      for (let dec=-90;dec<=90;dec+=2) pts.push(aitoff(ra,dec).join(','));
+      svg.appendChild(el('polyline',{points:pts.join(' '),fill:'none',stroke:c.grid,'stroke-width':'0.7'}));
+      const [lx,ly]=aitoff(ra,72);
+      const t=el('text',{x:lx,y:ly,'font-size':'9','fill':c.label,'font-family':'system-ui','text-anchor':'middle'});
+      t.textContent=`${ra/15}h`;
+      svg.appendChild(t);
+    }
+
+    // Galactic plane
+    {
+      const pts=[];
+      for(let l=0;l<=360;l+=3){
+        const lr=l*Math.PI/180, ngp_ra=192.85*Math.PI/180, ngp_dec=27.13*Math.PI/180, asc_node=122.93*Math.PI/180;
+        const sinDec=Math.sin(0)*Math.cos(ngp_dec)+Math.cos(0)*Math.sin(ngp_dec)*Math.cos(lr-asc_node);
+        const dec2=Math.asin(Math.max(-1,Math.min(1,sinDec)))*180/Math.PI;
+        const cosRa=(Math.cos(0)*Math.cos(lr-asc_node))/(Math.cos(dec2*Math.PI/180)||1e-9);
+        const sinRa=(-Math.sin(0)*Math.sin(ngp_dec)+Math.cos(0)*Math.cos(ngp_dec)*Math.cos(lr-asc_node))/(Math.cos(dec2*Math.PI/180)||1e-9);
+        let ra2=(Math.atan2(sinRa,cosRa)+ngp_ra)*180/Math.PI;
+        if(ra2<0)ra2+=360; if(ra2>360)ra2-=360;
+        pts.push(aitoff(ra2,dec2).join(','));
+      }
+      svg.appendChild(el('polyline',{points:pts.join(' '),fill:'none',stroke:c.gp,'stroke-width':'1.5','stroke-dasharray':'4 3'}));
+    }
+
+    svg.appendChild(el('ellipse',{cx,cy,rx:cx,ry:cy,fill:'none',stroke:c.rim,'stroke-width':'1.5'}));
+
+    const hosts = [
+      {name:'M87',       ra:187.7, dec: 12.4, confirmed:10, candidate:2},
+      {name:'NGC 1399',  ra: 54.6, dec:-35.5, confirmed: 7, candidate:2},
+      {name:'NGC 5128',  ra:201.4, dec:-43.0, confirmed: 7, candidate:2},
+      {name:'M31',       ra: 10.7, dec: 41.3, confirmed: 5, candidate:0},
+      {name:'NGC 3115',  ra:151.3, dec: -7.7, confirmed: 3, candidate:1},
+      {name:'NGC 4472',  ra:187.4, dec:  8.0, confirmed: 3, candidate:1},
+      {name:'NGC 1052',  ra: 40.3, dec: -8.3, confirmed: 2, candidate:1},
+      {name:'NGC 4552',  ra:189.0, dec: 12.6, confirmed: 2, candidate:1},
+    ];
+
+    hosts.forEach(h=>{
+      const [x,y]=aitoff(h.ra, h.dec);
+      const r=Math.max(4, Math.min(9, 3 + Math.sqrt(h.confirmed+h.candidate)));
+      svg.appendChild(el('circle',{cx:x,cy:y,r:r+2,'fill':'rgba(26,127,55,0.15)','stroke':'#1a7f37','stroke-width':'1'}));
+      svg.appendChild(el('circle',{cx:x,cy:y,r:5,fill:'#e8a82a',stroke:dark?'#0d1117':'#1e3a5f','stroke-width':'1.2'}));
+      const t=el('text',{x:x+8,y:y+3,'font-size':'9.5','fill':dark?'#8d96a0':'#4a5568','font-family':'system-ui'});
+      t.textContent=h.name;
+      svg.appendChild(t);
+    });
+  })();
+
+  render();
+});
+</script>
+
+</body></html>
