@@ -1,4 +1,8 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>GC Portal</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -456,18 +460,113 @@ textarea.form-input { height: auto; padding: 8px 10px; resize: vertical; }
   border-radius: 3px; padding: 10px 12px; margin-bottom: 14px;
 }
 
+/* ── Theme toggle button ─────────────────────────────────── */
+.theme-btn {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  padding: 6px 10px; border-radius: 3px; font-size: 11.5px;
+  border: 1px solid var(--sb-bdr); background: none;
+  color: var(--fg2); cursor: pointer; font-family: var(--font);
+  transition: all var(--t); margin-bottom: 8px;
+}
+.theme-btn:hover { background: var(--sb-hov); color: var(--fg); }
+
+/* ── Mobile top bar ──────────────────────────────────────── */
+.mob-bar {
+  display: none; position: fixed; top: 0; left: 0; right: 0; height: 48px;
+  background: #1e3a5f; z-index: 110;
+  align-items: center; padding: 0 14px; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+.mob-brand { display: flex; align-items: center; gap: 8px; flex: 1; }
+.mob-logo {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(232,168,42,0.45);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: #e8a82a;
+}
+.mob-title { color: #fff; font-size: 13px; font-weight: 600; }
+.mob-icon-btn {
+  background: none; border: none; color: rgba(255,255,255,0.75);
+  font-size: 16px; cursor: pointer; padding: 6px 8px; line-height: 1;
+  border-radius: 3px; transition: all var(--t);
+}
+.mob-icon-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* Sidebar overlay (mobile) */
+.sb-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 105;
+}
+.sb-overlay.open { display: block; }
+
+/* ── Hero two-column layout ──────────────────────────────── */
+.hero-inner { display: flex; gap: 28px; align-items: flex-start; }
+.hero-left   { flex: 1; min-width: 0; }
+.hero-right  {
+  flex-shrink: 0; width: 228px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 18px; display: flex; flex-direction: column; gap: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.hero-right-title {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.09em; color: var(--fg3); margin-bottom: 2px;
+}
+.hero-right-sep { border: none; border-top: 1px solid var(--bdr-s); margin: 2px 0; }
+.btn-block { width: 100%; justify-content: center; }
+
 /* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1060px) {
+  .hero-inner { flex-direction: column; }
+  .hero-right  { width: 100%; max-width: 460px; flex-direction: row; flex-wrap: wrap; padding: 14px 16px; gap: 8px; }
+  .hero-right-title { width: 100%; margin-bottom: 0; }
+  .hero-right-sep { display: none; }
+  .btn-block { width: auto; flex: 1; }
+}
 @media (max-width: 800px) {
   :root { --sidebar-w: 0px; }
-  .sidebar { display: none; }
-  .hero, .hcontent, .pg-hd, .fbar { padding-left: max(16px, env(safe-area-inset-left,0px)); padding-right: max(16px, env(safe-area-inset-right,0px)); }
-  .tbl-panel { margin-left: max(16px, env(safe-area-inset-left,0px)); margin-right: max(16px, env(safe-area-inset-right,0px)); }
+  .sidebar {
+    transform: translateX(-100%); transition: transform 0.22s ease; z-index: 106;
+  }
+  .sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.2); }
+  .mob-bar { display: flex; }
+  .main    { margin-left: 0; padding-top: 48px; }
+  .hero, .hcontent, .pg-hd, .fbar {
+    padding-left: max(16px, env(safe-area-inset-left,0px));
+    padding-right: max(16px, env(safe-area-inset-right,0px));
+  }
+  .hero { padding-top: 24px; padding-bottom: 24px; }
+  .tbl-panel {
+    margin-left: max(16px, env(safe-area-inset-left,0px));
+    margin-right: max(16px, env(safe-area-inset-right,0px));
+  }
+  .info-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 520px) {
+  .hero h1 { font-size: 20px; }
+  .hero-right { flex-direction: column; }
+  .btn-block  { width: 100%; }
+  .info-grid  { grid-template-columns: 1fr; }
+  .pg-hd-row  { flex-direction: column; }
+  .pg-acts    { flex-wrap: wrap; }
+  .pills      { gap: 5px; }
+  .action-cards { grid-template-columns: 1fr; }
 }
 </style>
 
 <!-- ═══════════════════════════════════════
      SIDEBAR
 ════════════════════════════════════════ -->
+<div class="mob-bar" id="mob-bar">
+  <div class="mob-brand">
+    <div class="mob-logo">GC</div>
+    <span class="mob-title">GC Portal</span>
+  </div>
+  <button class="mob-icon-btn" id="mob-theme-btn" onclick="toggleTheme()" title="Toggle theme">☀</button>
+  <button class="mob-icon-btn" id="mob-menu-btn" onclick="toggleSidebar()" title="Menu">☰</button>
+</div>
+<div class="sb-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
+
 <div class="layout">
 <nav class="sidebar">
   <div class="brand">
@@ -521,6 +620,10 @@ textarea.form-input { height: auto; padding: 8px 10px; resize: vertical; }
   </div>
 
   <div class="sb-footer">
+    <button class="theme-btn" onclick="toggleTheme()">
+      <span id="theme-icon">☾</span>
+      <span id="theme-label">Switch to dark</span>
+    </button>
     v0.01 &middot; <a href="#">EAT Group / UFRGS</a> &middot; <a href="#">LIneA</a>
   </div>
 </nav>
@@ -533,38 +636,29 @@ textarea.form-input { height: auto; padding: 8px 10px; resize: vertical; }
 <!-- ─── HOME VIEW ─────────────────────── -->
 <div id="view-home">
   <div class="hero">
-    <div class="welcome-line">EAT Group · UFRGS &nbsp;×&nbsp; LIneA Brazil</div>
-    <h1>Welcome to the GC Portal
-      <span class="sub">Open Extragalactic Globular Cluster Portal</span>
-    </h1>
-    <p class="hero-desc">A spectroscopically confirmed catalogue of extragalactic globular clusters — built as a training set for LSST photometric classification. Jointly maintained by the EAT Group (UFRGS) and LIneA.</p>
-
-    <div class="action-cards">
-      <div class="acard">
-        <div class="acard-icon">↑</div>
-        <div class="acard-title">Upload GC Data</div>
-        <div class="acard-desc">Contribute spectroscopic measurements, space-based imaging data, or new GC catalogue entries to the portal.</div>
-        <button class="btn btn-ghost btn-sm acard-btn" id="btn-upload">Contribute data →</button>
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="welcome-line">EAT Group · UFRGS &nbsp;×&nbsp; LIneA Brazil</div>
+        <h1>Welcome to the GC Portal
+          <span class="sub">Open Extragalactic Globular Cluster Portal</span>
+        </h1>
+        <p class="hero-desc">A spectroscopically confirmed catalogue of extragalactic globular clusters — built as a training set for LSST photometric classification. Jointly maintained by the EAT Group (UFRGS) and LIneA.</p>
+        <div class="pills">
+          <div class="pill"><span class="n">18,426</span><span class="l">confirmed GCs</span></div>
+          <div class="pill"><span class="n">612</span><span class="l">host galaxies</span></div>
+          <div class="pill"><span class="n">5,907</span><span class="l">spectra</span></div>
+          <div class="pill tag"><span class="k">LSST-ready</span>&nbsp;<span class="v">training set</span></div>
+        </div>
       </div>
-      <div class="acard acard-hi">
-        <div class="acard-icon">⊙</div>
-        <div class="acard-title">Query GC Data</div>
-        <div class="acard-desc">Browse, filter and download the full catalogue by host galaxy, classification type or sky position.</div>
-        <button class="btn btn-pri btn-sm acard-btn" onclick="nav(null,'cat')">Browse catalogue →</button>
+      <div class="hero-right">
+        <div class="hero-right-title">Quick actions</div>
+        <button class="btn btn-ghost btn-block" id="btn-upload">↑ Upload GC Data</button>
+        <button class="btn btn-pri btn-block" onclick="nav(null,'cat')">⊙ Query GC Data</button>
+        <hr class="hero-right-sep">
+        <button class="btn btn-out btn-block" id="btn-dl-hero">
+          ↓ Download catalogue
+        </button>
       </div>
-    </div>
-
-    <div class="pills">
-      <div class="pill"><span class="n">18,426</span><span class="l">confirmed GCs</span></div>
-      <div class="pill"><span class="n">612</span><span class="l">host galaxies</span></div>
-      <div class="pill"><span class="n">5,907</span><span class="l">spectra</span></div>
-      <div class="pill tag"><span class="k">LSST-ready</span>&nbsp;<span class="v">training set</span></div>
-    </div>
-    <div class="acts" style="margin-top:4px">
-      <button class="btn btn-ghost btn-sm" id="btn-dl-hero">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 13h12"/></svg>
-        Download full catalogue
-      </button>
     </div>
   </div>
 
@@ -1021,6 +1115,40 @@ function downloadCsvAndBib(data) {
   setTimeout(()=>downloadBib(), 300);
 }
 
+/* ── Theme & sidebar ──────────────────────────────────────── */
+function toggleTheme() {
+  const root = document.documentElement;
+  const isDark = root.getAttribute('data-theme') === 'dark' ||
+    (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const next = isDark ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  try { localStorage.setItem('gc-theme', next); } catch(e) {}
+  updateThemeIcon();
+}
+function updateThemeIcon() {
+  const root = document.documentElement;
+  const isDark = root.getAttribute('data-theme') === 'dark' ||
+    (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const icon = document.getElementById('theme-icon');
+  const lbl  = document.getElementById('theme-label');
+  const mob  = document.getElementById('mob-theme-btn');
+  if (icon) icon.textContent = isDark ? '☀' : '☾';
+  if (lbl)  lbl.textContent  = isDark ? 'Switch to light' : 'Switch to dark';
+  if (mob)  mob.textContent  = isDark ? '☀' : '☾';
+}
+function toggleSidebar() {
+  const sb = document.querySelector('.sidebar');
+  const ov = document.getElementById('sb-overlay');
+  const isOpen = sb.classList.toggle('open');
+  if (ov) ov.classList.toggle('open', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+(function initTheme() {
+  let saved; try { saved = localStorage.getItem('gc-theme'); } catch(e) {}
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  updateThemeIcon();
+})();
+
 /* ── Init ─────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   // Populate host dropdown
@@ -1158,5 +1286,5 @@ document.addEventListener('DOMContentLoaded', () => {
   render();
 });
 </script>
-
-</body></html>
+</body>
+</html>
